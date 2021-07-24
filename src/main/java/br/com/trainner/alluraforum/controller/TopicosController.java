@@ -1,23 +1,47 @@
 package br.com.trainner.alluraforum.controller;
 
 import br.com.trainner.alluraforum.controller.dto.TopicoDto;
-import br.com.trainner.alluraforum.modelo.Curso;
+import br.com.trainner.alluraforum.controller.form.TopicoForm;
+import br.com.trainner.alluraforum.controller.repository.CursoRepository;
 import br.com.trainner.alluraforum.modelo.Topico;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import br.com.trainner.alluraforum.controller.repository.TopicoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Arrays;
+import javax.validation.Valid;
+import java.net.URI;
 import java.util.List;
 
 
 @RestController
+@RequestMapping("/topicos")
 public class TopicosController {
 
-    @RequestMapping("/topicos")
+    @Autowired
+    private TopicoRepository topicoRepository;
 
-    public List<TopicoDto> list() {
-        Topico topico = new Topico("Duvida", "Duvida com Spring", new Curso("Spring", "Programação"));
+    @Autowired
+    private CursoRepository cursoRepository;
 
-        return TopicoDto.converter(Arrays.asList(topico));
+    @GetMapping
+    public List<TopicoDto> list(String nomeCurso) {
+        if (nomeCurso == null) {
+            List<Topico> topicos = topicoRepository.findAll();
+            return TopicoDto.converter(topicos);
+        } else {
+            List<Topico> topicos = topicoRepository.findByCursoNome(nomeCurso);
+            return TopicoDto.converter(topicos);
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<TopicoDto> cadastrar(@RequestBody @Valid TopicoForm form, UriComponentsBuilder uriBuilder) {
+        Topico topico = form.converter(cursoRepository);
+        topicoRepository.save(topico);
+
+        URI uri = uriBuilder.path("/topicos/{id}").buildAndExpand(topico.getId()).toUri();
+        return ResponseEntity.created(uri).body(new TopicoDto(topico));
     }
 }
