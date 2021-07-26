@@ -1,9 +1,7 @@
 package br.com.trainner.alluraforum.controller.dto;
 
-import br.com.trainner.alluraforum.modelo.Resposta;
 import br.com.trainner.alluraforum.modelo.StatusTopico;
 import br.com.trainner.alluraforum.modelo.Topico;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
